@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment #资源的类型
+metadata:
+  name: user-v1 #资源的名称
+spec:
+  selector:
+    matchLabels:
+      app: user-v1
+  replicas: 3 #声明pod副本的数量
+  template:
+    metadata:
+      labels:
+        app: user-v1
+    spec: #描述的是pod内容器信息
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80

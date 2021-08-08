@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment #资源类型
+metadata:
+  name: user-v1 # 资源名称
+spec:
+  selector:
+    matchLabels:
+      app: user-v1
+  replicas: 3 #声明pod的副本数量
+  template:
+    metadata:
+      labels:
+        app: user-v1
+    spec: #描述的是pod内的容器信息
+      containers:
+        - name: nginx
+          image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v1
+          ports:
+            - containerPort: 80 #容器内映射的端口号

@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /user
+            backend:
+              serviceName: service-user-v1
+              servicePort: 80
+          - path: /pay
+            backend:
+              serviceName: service-pay-v1
+              servicePort: 80
+  backend:
+    serviceName: service-user-v1
+    servicePort: 80

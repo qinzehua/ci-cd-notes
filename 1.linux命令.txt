@@ -1,0 +1,28 @@
+1. cp 复制文件
+    cp -r 复制文件夹
+
+2.ln 生成文件链接
+ln -s /root/folder/11.txt 22.txt
+
+文件搜索命令
+1.安装 mlocate
+   yum -y install mlocate
+每天更新一次文件索引, 搜索新文件前执行: updatedb
+搜索： locate 222.txt
+
+2.whereis 搜索某个命令的位置
+
+3.which 和 whereis 差不多
+
+4.find,在一个文件范围搜索文件
+ find /src -name 111.txt 在src目录下按名字找111.txt文件
+  find /src -user 111.txt 按所有者搜索
+ find /src -mtime +5  找5天以前的文件
+
+5.grep
+ -i 忽略大小写
+ -v 排除指定字符
+grep 123 a.txt 输出a.txt 文件中包含 123的行
+
+6.zip
+yum install -y unzip zip
