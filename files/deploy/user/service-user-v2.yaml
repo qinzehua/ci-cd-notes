@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: service-pay-v1
+  name: service-user-v2
 spec:
   selector:
-    app: pay-pod-v1
+    app: pod-user-v2
   ports:
     - protocol: TCP
       port: 80

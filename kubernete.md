@@ -2,23 +2,13 @@
 
 ```
 yum install nptdate -y
-
 systemctl stop firewalld & systemctl disable firewalld
-
-# 临时禁用selinux
 setenforce 0
-
-# 永久关闭 修改/etc/sysconfig/selinux文件设置
 sed -i 's/SELINUX=permissive/SELINUX=disabled/' /etc/sysconfig/selinux
 sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
-
-
-# 禁用交换分区
 swapoff -a
-# 永久禁用，打开/etc/fstab注释掉swap那一行。
 sed -i 's/.*swap.*/#&/' /etc/fstab
 
-# 修改内核参数
 cat <<EOF >  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
@@ -48,11 +38,9 @@ yum install -y docker-ce
 systemctl enable docker && systemctl start docker
 ```
 
-`mkdir -p /etc/docker`
-
-`vi /etc/docker/daemon.json`
-
 ```
+mkdir -p /etc/docker
+cat <<EOF > /etc/docker/daemon.json
 {
   "registry-mirrors": [
     "https://registry.docker-cn.com",
@@ -60,12 +48,11 @@ systemctl enable docker && systemctl start docker
     "https://docker.mirrors.ustc.edu.cn"
   ]
 }
+EOF
 
+systemctl daemon-reload
+systemctl restart docker
 ```
-
-`systemctl daemon-reload`
-
-`systemctl restart docker`
 
 #### 2.7 安装 k8s 组件
 
@@ -86,7 +73,7 @@ EOF
 
 #### 2.7.2 安装 kubenenter 组件
 
-`yum install -y kubelet kubeadm kubectl`
+`yum install -y kubelet-1.20.0 kubeadm-1.20.0 kubectl-1.20.0`
 
 `systemctl enable kubelet && systemctl start kubelet`
 
@@ -256,6 +243,8 @@ spec:
 
 替换:
 image: registry.cn-hangzhou.aliyuncs.com/bin_x/nginx-ingress:v0.34.1@sha256:80359bdf124d49264fabf136d2aecadac729b54f16618162194356d3c78ce2fe
+
+kubectl apply -f deploy.yaml
 
 ```
 
