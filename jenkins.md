@@ -55,3 +55,11 @@ gpasswd -a jenkins docker
 newgrp docker
 
 ```
+
+### 测试
+
+![screenshot-39 104 170 121_8080-2021 08 11-21_40_52](https://user-images.githubusercontent.com/20763362/129058912-a1cb4b1f-4d33-4293-b10b-bde75a27e151.png)
+
+### 安装 node
+
+![screenshot-39 104 170 121_8080-2021 08 11-23_38_00](https://user-images.githubusercontent.com/20763362/129060053-0c57b025-97cc-4d6c-a1e3-6bd4f5897533.png)
