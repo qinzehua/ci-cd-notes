@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: shell-probe
+  name: shell-probe
+spec:
+  containers:
+    - name: shell-probe
+      image: registry.aliyuncs.com/google_containers/busybox
+      args:
+        - /bin/sh
+        - -c
+        - touch /tmp/health;sleep 30; rm -rf /tmp/health; sleep 600;
+      livenessProbe:
+        exec:
+          command:
+            - cat
+            - /tmp/health
+        initialDelaySeconds: 5
+        periodSeconds: 5
