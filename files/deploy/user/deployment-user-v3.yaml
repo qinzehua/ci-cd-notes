@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment #资源类型
 metadata:
-  name: deployment-pay-v1 # 资源名称
+  name: deployment-user-v3 # 资源名称
 spec:
   selector:
     matchLabels:
-      app: pod-pay-v1
-  replicas: 1 #声明pod的副本数量
+      app: pod-user-v3
+  replicas: 1
   template:
     metadata:
       labels:
-        app: pod-pay-v1
-    spec: #描述的是pod内的容器信息
+        app: pod-user-v3
+    spec:
       containers:
         - name: nginx
-          image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:pay
+          image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v2
           ports:
             - containerPort: 80 #容器内映射的端口号

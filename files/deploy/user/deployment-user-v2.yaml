@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: pod-user-v2
-  replicas: 3 #声明pod的副本数量
+  replicas: 1 #声明pod的副本数量
   template:
     metadata:
       labels:
@@ -14,6 +14,17 @@ spec:
     spec: #描述的是pod内的容器信息
       containers:
         - name: nginx
+          env:
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret-opaque-file
+                  key: username
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret-opaque-file
+                  key: password
           image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v2
           ports:
             - containerPort: 80 #容器内映射的端口号
