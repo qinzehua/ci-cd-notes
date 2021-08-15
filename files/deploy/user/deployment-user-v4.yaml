@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment #资源类型
 metadata:
-  name: deployment-user-v1 # 资源名称
+  name: deployment-user-v4 # 资源名称
 spec:
   selector:
     matchLabels:
-      app: pod-user-v1
+      app: pod-user-v4
   replicas: 1 #声明pod的副本数量
   template:
     metadata:
       labels:
-        app: pod-user-v1
+        app: pod-user-v4
     spec: #描述的是pod内的容器信息
       containers:
         - name: nginx
