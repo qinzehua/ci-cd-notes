@@ -286,3 +286,50 @@ kubectl create configmap env-from-file --from-file=./configmaps/env.config
 ```
 kubectl create configmap env-from-dir --from-file=./configmaps/config
 ```
+
+## 6.2 使用方式
+
+### 6.2.1 环境变量注入
+
+```diff
+     spec: #描述的是pod内的容器信息
+       containers:
+         - name: nginx
++          envFrom:
++            - configMapRef:
++              name: mysql-config
++              optional: true
+           image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v1
+           ports:
+             - containerPort: 80 #容器内映射的端口号
+```
+
+```
+apiVersion: apps/v1
+kind: Deployment #资源类型
+metadata:
+  name: deployment-user-v5 # 资源名称
+spec:
+  selector:
+    matchLabels:
+      app: pod-user-v5
+  replicas: 1 #声明pod的副本数量
+  template:
+    metadata:
+      labels:
+        app: pod-user-v5
+    spec:
+      volumes:
+        - name: mysql-config-volume # 数据卷名称
+          configMap:
+            name: mysql-config # configmap 名字
+      containers:
+        - name: nginx
+          image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v1
+          volumeMounts:
+            - name: mysql-config-volume
+              mountPath: /mysql-config
+              readOnly: true
+          ports:
+            - containerPort: 80 #容器内映射的端口号
+```
