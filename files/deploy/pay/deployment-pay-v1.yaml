@@ -12,6 +12,11 @@ spec:
       labels:
         app: pod-pay-v1
     spec: #描述的是pod内的容器信息
+      tolerations:
+        - key: "deployment-pay-v1"
+          value: "true"
+          operator: "Equal"
+          effect: "NoSchedule"
       containers:
         - name: nginx
           image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:pay

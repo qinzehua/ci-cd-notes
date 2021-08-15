@@ -304,32 +304,57 @@ kubectl create configmap env-from-dir --from-file=./configmaps/config
              - containerPort: 80 #容器内映射的端口号
 ```
 
+### 6.2.2 存储卷挂载
+
+```diff
+     metadata:
+       labels:
+         app: pod-user-v5
+-    spec: #描述的是pod内的容器信息
++    spec:
++      volumes:
++        - name: mysql-config-volume # 数据卷名称
++          configMap:
++            name: mysql-config # configmap 名字
+       containers:
+         - name: nginx
+           image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v1
++          volumeMounts:
++            - name: mysql-config-volume
++              mountPath: /mysql-config
++              readOnly: true
+           ports:
+             - containerPort: 80 #容器内映射的端口号
+
 ```
-apiVersion: apps/v1
-kind: Deployment #资源类型
-metadata:
-  name: deployment-user-v5 # 资源名称
-spec:
-  selector:
-    matchLabels:
-      app: pod-user-v5
-  replicas: 1 #声明pod的副本数量
-  template:
-    metadata:
-      labels:
-        app: pod-user-v5
-    spec:
-      volumes:
-        - name: mysql-config-volume # 数据卷名称
-          configMap:
-            name: mysql-config # configmap 名字
-      containers:
-        - name: nginx
-          image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v1
-          volumeMounts:
-            - name: mysql-config-volume
-              mountPath: /mysql-config
-              readOnly: true
-          ports:
-            - containerPort: 80 #容器内映射的端口号
+
+# 7 污点与容忍
+
+## 在 k8snode 上设置污点，让 deployment-pay-v1 无法被调度
+
+```
+kubectl taint nodes k8snode deployment-pay-v1=true:NoSchedule
+```
+
+## 想让 deployment-pay-v1 这个 pod 被调度，需要给 pod 设置一组容忍度
+
+```diff
+       labels:
+         app: pod-pay-v1
+     spec: #描述的是pod内的容器信息
++      tolerations:
++        - key: "deployment-pay-v1"
++          value: true
++          operator: "Equal"
++          effect: "NoSchedule"
+       containers:
+         - name: nginx
+           image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:pay
+
+```
+
+## 删除污点
+
+```
+kubectl taint node k8snode deployment-pay-v1-
 ```
