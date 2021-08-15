@@ -1,4 +1,4 @@
-#### 2.1 安装必要插件
+# 1 安装必要插件, 以及相关必要设置
 
 ```
 yum install nptdate -y
@@ -72,7 +72,7 @@ echo '172.19.223.171  k8snode' >> /etc/hosts
 
 拷贝 linux 目录下的配置文件到 k8smaster 服务器
 
-### 3. Master
+# 2 安装 k8s 相关 images, 安装 Flannel (这两个操作在 master)
 
 ```
 kubeadm config images list --config init-kubeadm.conf
@@ -92,13 +92,11 @@ kubectl apply -f kube-flannel.yml
 
 ```
 
-#### 3.5 安装 Flannel (这个操作在 master)
+```
+scp $HOME/.kube/config root@172.19.223.171:~/
+```
 
-#### 3.7 node 节点配置
-
-### master
-
-`scp $HOME/.kube/config root@172.19.223.171:~/`
+# 3 Node 节点操作
 
 ```
 mkdir -p $HOME/.kube
@@ -106,37 +104,10 @@ sudo mv $HOME/config $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-`kubeadm token create --print-join-command`
+## 在 master 节点获取 node 加入的 token
 
 ```
-kubectl apply -f /root/deploy/user/deployment-user-v1.yaml
-kubectl apply -f /root/deploy/user/deployment-user-v2.yaml
-kubectl apply -f /root/deploy/user/service-user-v1.yaml
-kubectl apply -f /root/deploy/user/service-user-v2.yaml
-kubectl apply -f /root/deploy/pay/deployment-pay-v1.yaml
-kubectl apply -f /root/deploy/pay/service-pay-v1.yaml
-```
-
-安装 ingress
-
-```
-kubectl apply -f /root/deploy.yaml
-
-```
-
-启动 ingress 的不同配置
-
-```
-kubectl apply -f /root/ingress.yaml
-kubectl apply -f /root/ingress-gray.yaml
-```
-
-```
-阿里云需要开发过的端口号(默认)， (根据创建服务的具体设置开放)
-jinkins: 8080
-ingress: 31234, 31235
-nexus 服务端口: 8081
-nexus docker 仓库端口: 8082
+kubeadm token create --print-join-command
 ```
 
 # 4 存储机密信息
@@ -154,18 +125,7 @@ kubectl get secret
 ### 4.1.2 通过声明式
 
 ```
-cat <<EOF > ./secret-opaque-file.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: my-secret-opaque-file
-stringData:
-  username: admin
-  password: admin
-type: Opaque
-EOF
-
-kubectl apply -f secret-opaque-file.yaml
+kubectl apply -f ./secrets/secret-opaque-file.yaml
 ```
 
 ### 4.1.3 查看(kubectl get secret secret 名字 -o json)
@@ -186,16 +146,7 @@ kubectl create secret docker-registry my-registry-auth --docker-username=admin -
 ### 4.2.2 声明式
 
 ```
-cat <<EOF > ./secret-registry-file.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: my-registry-auth-file
-stringData:
-  .dockerconfigjson: eyJhdXRocyI6eyIzOS4xMDQuMTcwLjEyMTo4MDgyIjp7InVzZXJuYW1lIjoiYWRtaW4iLCJwYXNzd29yZCI6IjEyMyIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5vcmciLCJhdXRoIjoiWVdSdGFXNDZNVEl6In19fQ==
-type: Opaque
-
-kubectl apply -f secret-registry-file.yaml
+kubectl apply -f ./secrets/secret-registry-file.yaml
 ```
 
 ## 4.3 使用
@@ -254,28 +205,84 @@ kubectl apply -f secret-registry-file.yaml
              - containerPort: 80 #容器内映射的端口号
 ```
 
-### 4.3.2 Docker 私有库认证
+### 4.3.3 Docker 私有库认证
 
 deployment-user-v3.yaml
 
+```diff
+       labels:
+         app: pod-user-v3
+     spec:
++      imagePullSecrets:
++        - name: my-registry-auth-file
+       containers:
+-        - name: nginx
+-          image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v2
++        - name: reactproject
++          image: 39.104.170.121:8082/reactproject:20210814113053
+           ports:
+             - containerPort: 80 #容器内映射的端口号
 ```
-apiVersion: apps/v1
-kind: Deployment #资源类型
-metadata:
-  name: deployment-user-v3 # 资源名称
-spec:
-  selector:
-    matchLabels:
-      app: pod-user-v3
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: pod-user-v3
-    spec:
-      containers:
-        - name: reactproject
-          image: 39.104.170.121:8082/reactproject:20210814113053
-          ports:
-            - containerPort: 80 #容器内映射的端口号
+
+```
+kubectl apply -f /root/deploy/user/deployment-user-v1.yaml
+kubectl apply -f /root/deploy/user/deployment-user-v2.yaml
+kubectl apply -f /root/deploy/user/deployment-user-v3.yaml
+kubectl apply -f /root/deploy/pay/deployment-pay-v1.yaml
+
+kubectl apply -f /root/deploy/user/service-user-v1.yaml
+kubectl apply -f /root/deploy/user/service-user-v2.yaml
+kubectl apply -f /root/deploy/user/service-user-v3.yaml
+kubectl apply -f /root/deploy/pay/service-pay-v1.yaml
+```
+
+安装 ingress,启动 ingress 的不同配置
+
+```
+kubectl apply -f /root/deploy.yaml
+kubectl apply -f /root/ingress.yaml
+kubectl apply -f /root/ingress-gray.yaml
+
+```
+
+```
+阿里云需要开发过的端口号(默认)， (根据创建服务的具体设置开放)
+jinkins: 8080
+ingress: 31234, 31235
+nexus 服务端口: 8081
+nexus docker 仓库端口: 8082
+```
+
+# 6 统一管理服务环境变量
+
+## 6.1 创建
+
+### 6.1.1 命令行创建
+
+```
+kubectl create configmap mysql-config --from-literal=MYSQL_HOST=127.0.0.1 --from-literal=MYSQL_PORT=3306
+```
+
+### 查看
+
+```
+kubectl get configmap mysql-config  -o json
+```
+
+### 6.1.2 配置清单创建
+
+```
+kubectl apply -f ./configmaps/mysql-config-file.yaml
+```
+
+### 6.1.3 文件创建
+
+```
+kubectl create configmap env-from-file --from-file=./configmaps/env.config
+```
+
+### 6.1.4 目录创建
+
+```
+kubectl create configmap env-from-dir --from-file=./configmaps/config
 ```

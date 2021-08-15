@@ -12,8 +12,10 @@ spec:
       labels:
         app: pod-user-v3
     spec:
+      imagePullSecrets:
+        - name: my-registry-auth
       containers:
-        - name: nginx
-          image: registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v2
+        - name: reactproject
+          image: 39.104.170.121:8082/reactproject:20210815122359
           ports:
             - containerPort: 80 #容器内映射的端口号

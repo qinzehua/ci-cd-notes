@@ -17,6 +17,10 @@ spec:
             backend:
               serviceName: service-pay-v1
               servicePort: 80
+          - path: /react-ci
+            backend:
+              serviceName: service-user-v3
+              servicePort: 80
   backend:
     serviceName: service-user-v1
     servicePort: 80
